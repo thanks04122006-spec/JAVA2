@@ -29,5 +29,7 @@ public class Password {
         }
         else
             System.out.println("OK~ 비밀번호 규칙에 맞습니다");
+
+        input.close();
     }
 }
