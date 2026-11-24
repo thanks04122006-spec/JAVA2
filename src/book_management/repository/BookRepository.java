@@ -54,44 +54,16 @@ public class BookRepository {
         return bookList;
     }
 
+//    ================================================   추가   ============================================
     public void Insert(Book book){
         Connection con = JDBCConnector.getConnection();
         PreparedStatement pstmt = null;
 
         String sql = "insert into book values(?,?,?,?,?,?,?)";
 //        출판사명을 ID 정수 값으로 변경
-        int publish_id = 0;
-        switch (book.getPublish_name()) {
-            case "한빛아카데미":
-                publish_id = 1;
-                break;
-            case "생능출판사":
-                publish_id = 2;
-                break;
-            case "민음사":
-                publish_id = 3;
-                break;
-            case "해냄출판사":
-                publish_id = 4;
-                break;
-        }
-        
+        int publish_id = ToPublishId(book.getPublish_name());
 //        category를 id 정수값으로 변경
-        int category_id = 0;
-        switch (book.getCategory_name()) {
-            case "IT도서":
-                category_id = 10;
-                break;
-            case "소설":
-                category_id = 20;
-                break;
-            case "수필":
-                category_id = 30;
-                break;
-            case "시":
-                category_id = 40;
-                break;
-        }
+        int category_id = ToCategoryId(book.getCategory_name());
 
         try {
             pstmt = con.prepareStatement(sql);
@@ -116,5 +88,89 @@ public class BookRepository {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+//    ================================================   수정   ============================================
+    public void update(Book book){
+        String sql = "update book set name=?, author=?, price=?, inventory=?, category_id=?, publish_id=? where isbn=?";
+
+        try (Connection con = JDBCConnector.getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, book.getName());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setInt(3, book.getPrice());
+            pstmt.setInt(4, book.getInventory());
+
+            //        출판사명을 ID 정수 값으로 변경
+            int publish_id = ToPublishId(book.getPublish_name());
+
+            //        category를 id 정수값으로 변경
+            int category_id = ToCategoryId(book.getCategory_name());
+
+            pstmt.setInt(5, category_id);
+            pstmt.setInt(6, publish_id);
+            pstmt.setString(7, book.getIsbn());
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    ================================================   삭제   ============================================
+public void delete(String isbn){
+    Connection con = JDBCConnector.getConnection();
+
+    String sql = "delete from book where isbn=?";
+    PreparedStatement pstmt = null;
+
+    try {
+        pstmt = con.prepareStatement(sql);
+        pstmt.setString(1, isbn);
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+//    ======================================= 출판사명, 카테고리값 정수값 변경 ==============================
+    public int ToPublishId(String publishName){
+        //        출판사명을 ID 정수 값으로 변경
+        int publish_id = 0;
+        switch (publishName) {
+            case "한빛아카데미":
+                publish_id = 1;
+                break;
+            case "생능출판사":
+                publish_id = 2;
+                break;
+            case "민음사":
+                publish_id = 3;
+                break;
+            case "해냄출판사":
+                publish_id = 4;
+                break;
+        }
+        return publish_id;
+    }
+
+    public int ToCategoryId(String categoryName){
+//        category를 id 정수값으로 변경
+        int category_id = 0;
+        switch (categoryName) {
+            case "IT도서":
+                category_id = 10;
+                break;
+            case "소설":
+                category_id = 20;
+                break;
+            case "수필":
+                category_id = 30;
+                break;
+            case "시":
+                category_id = 40;
+                break;
+        }
+        return category_id;
     }
 }
