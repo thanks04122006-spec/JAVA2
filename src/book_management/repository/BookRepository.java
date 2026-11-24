@@ -130,6 +130,13 @@ public void delete(String isbn){
         pstmt.executeUpdate();
     } catch (SQLException e) {
         throw new RuntimeException(e);
+    }finally {
+        try {
+            pstmt.close();
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
